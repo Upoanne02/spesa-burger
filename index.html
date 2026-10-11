@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spesa Burger</title>
+<meta name="theme-color" content="#0b0907">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spesa Burger">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: una colonna da telefono, reparti come gruppi, ogni prodotto una scheda: sopra si spunta, sotto si apre "a cosa serve". Tema unico scuro, voluto. */
+:root {
+  --bg: #0b0907;
+  --card: #16120e;
+  --card-on: #100d0a;
+  --line: #2a221a;
+  --fg: #f5ede3;
+  --muted: #9a8c7c;
+  --cheddar: #f2a33a;
+  --cheddar-deep: #c9761c;
+  --ink: #1a1009;
+  --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); }
+body {
+  font: 16px/1.4 var(--body);
+  padding-inline: max(16px, env(safe-area-inset-left));
+  padding-block: calc(env(safe-area-inset-top) + 20px) calc(env(safe-area-inset-bottom) + 32px);
+  max-width: 520px;
+  margin-inline: auto;
+  min-height: 100vh;
+  background: radial-gradient(120% 60% at 50% -10%, rgba(242,163,58,.16), transparent 60%), var(--bg);
+  background-attachment: fixed;
+}
+button { font: inherit; color: inherit; }
+
+header { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; }
+.logo { width: 58px; height: 58px; filter: drop-shadow(0 6px 16px rgba(242,163,58,.35)); animation: bob 4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-3px) rotate(-3deg); } }
+h1 { font: 800 30px/1 var(--display); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+.ring { width: 58px; height: 58px; position: relative; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 6; }
+.ring .track { stroke: var(--line); }
+.ring .bar { stroke: var(--cheddar); stroke-linecap: round; transition: stroke-dashoffset .5s cubic-bezier(.3,1.4,.5,1); }
+.ring .num { position: absolute; inset: 0; display: grid; place-items: center; font: 800 15px var(--display); font-variant-numeric: tabular-nums; }
+
+.hint { margin: 16px 4px 0; color: var(--muted); font-size: 14px; }
+
+.done-banner {
+  margin-top: 18px; padding: 14px 16px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--cheddar), var(--cheddar-deep));
+  color: var(--ink); font: 800 18px var(--display);
+  display: flex; align-items: center; gap: 12px;
+  animation: pop .5s cubic-bezier(.3,1.6,.5,1);
+}
+.done-banner img { width: 40px; height: 40px; }
+@keyframes pop { from { transform: scale(.8); opacity: 0; } }
+
+section { margin-top: 28px; }
+.dept { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 10px; }
+.dept h2 { font: 800 13px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--cheddar); margin: 0; }
+.dept span { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.card {
+  border-radius: 18px; background: var(--card); border: 1px solid var(--line);
+  overflow: hidden; transition: background .25s;
+}
+.item {
+  display: grid; grid-template-columns: 52px 1fr auto; gap: 14px; align-items: center;
+  width: 100%; padding: 12px 14px 10px 10px; background: none; border: 0;
+  text-align: left; cursor: pointer; transition: transform .12s;
+}
+.item:active { transform: scale(.98); }
+.item:focus-visible, .more:focus-visible { outline: 2px solid var(--cheddar); outline-offset: -2px; border-radius: 18px; }
+.ico { width: 52px; height: 52px; display: grid; place-items: center; font-size: 34px; }
+.ico img { width: 48px; height: 48px; transition: transform .35s cubic-bezier(.3,1.8,.5,1), filter .3s; }
+.txt { min-width: 0; transition: opacity .25s; }
+.name { font-weight: 600; font-size: 17px; }
+.qty { color: var(--muted); font-size: 14px; margin-top: 1px; }
+.qty b { color: var(--fg); font-weight: 600; }
+.check {
+  width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line);
+  display: grid; place-items: center; transition: background .25s, border-color .25s;
+}
+.check svg { width: 16px; height: 16px; stroke: var(--ink); stroke-width: 3.2; fill: none; stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset .3s .05s; }
+
+.more {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px 10px 76px; background: none; border: 0; border-top: 1px dashed var(--line);
+  color: var(--muted); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer;
+}
+.more svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.4; fill: none; transition: transform .3s; margin-left: auto; }
+.card.open .more { color: var(--cheddar); }
+.card.open .more svg { transform: rotate(180deg); }
+
+.uses { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+.card.open .uses { grid-template-rows: 1fr; }
+.uses > div { overflow: hidden; }
+.uses-in { padding: 2px 16px 16px 76px; display: grid; gap: 8px; }
+.use { display: grid; grid-template-columns: 1fr auto; gap: 12px; font-size: 15px; }
+.use span:last-child { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.use small { display: block; color: var(--muted); font-size: 13px; }
+.total { border-top: 1px solid var(--line); padding-top: 8px; display: grid; grid-template-columns: 1fr auto; gap: 12px; font-weight: 600; }
+.total span:last-child { color: var(--cheddar); font-variant-numeric: tabular-nums; }
+.home {
+  margin-top: 4px; padding: 10px 12px; border-radius: 12px;
+  background: rgba(242,163,58,.1); color: var(--fg); font-size: 14px;
+}
+
+.card.on { background: var(--card-on); }
+.card.on .txt { opacity: .45; }
+.card.on .name { text-decoration: line-through; text-decoration-color: var(--cheddar); text-decoration-thickness: 2px; }
+.card.on .ico img { filter: grayscale(.7); transform: scale(.85); opacity: .6; }
+.card.on .check { background: var(--cheddar); border-color: var(--cheddar); }
+.card.on .check svg { stroke-dashoffset: 0; }
+.card.bump .ico img { animation: bump .45s cubic-bezier(.3,1.8,.5,1); }
+@keyframes bump { 40% { transform: scale(1.25) rotate(-8deg); } }
+
+footer { margin-top: 32px; display: flex; justify-content: center; }
+.reset {
+  font-weight: 600; font-size: 14px; color: var(--muted); background: none;
+  border: 1px solid var(--line); border-radius: 999px; padding: 10px 18px; cursor: pointer;
+}
+.reset.arm { color: var(--ink); background: var(--cheddar); border-color: var(--cheddar); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo" src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Hamburger/3D/hamburger_3d.png" alt="">
+  <div>
+    <h1>Spesa burger</h1>
+    <div class="sub">Per 2 · domenica 11 ottobre</div>
+  </div>
+  <div class="ring" aria-live="polite">
+    <svg viewBox="0 0 58 58"><circle class="track" cx="29" cy="29" r="25"/><circle class="bar" id="bar" cx="29" cy="29" r="25"/></svg>
+    <div class="num" id="num">0/0</div>
+  </div>
+</header>
+
+<p class="hint">Tocca un prodotto per spuntarlo. "A cosa serve" ti dice quanto ne usi e dove, così sai se ti basta quello che hai a casa.</p>
+
+<div id="banner"></div>
+<main id="list"></main>
+
+<footer><button class="reset" id="reset" type="button">Ricomincia la lista</button></footer>
+
+<script>
+const ICON = n => 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/'
+  + encodeURIComponent(n) + '/3D/' + n.toLowerCase().replace(/ /g, '_') + '_3d.png';
+
+// need = quanto ne usi in tutto; buy = cosa prendere se a casa non basta; uses = [dove, quanto, nota]
+const DEPTS = [
+  { name: 'Macelleria', items: [
+    { id: 'manzo', name: 'Macinato di manzo', icon: 'Cut of meat', emoji: '🥩',
+      need: '400 g', buy: 'scottona o reale, 20% grasso',
+      uses: [['2 polpette da 200 g', '400 g', 'Chiedilo macinato una volta sola, non fine']] },
+    { id: 'bacon', name: 'Bacon affumicato', icon: 'Bacon', emoji: '🥓',
+      need: '8 fette', buy: 'fette lunghe, ~120 g',
+      uses: [['4 fette per burger', '8 fette', 'Il grasso che rilascia lo tieni: ci cuoci le polpette']] },
+  ]},
+  { name: 'Freschi e latticini', items: [
+    { id: 'cheddar', name: 'Cheddar a fette', icon: 'Cheese wedge', emoji: '🧀',
+      need: '4 fette', buy: 'una confezione',
+      uses: [['2 fette per burger, sciolte sulla carne', '4 fette']] },
+    { id: 'latte', name: 'Latte intero', icon: 'Glass of milk', emoji: '🥛',
+      need: '160 ml', buy: 'il formato più piccolo',
+      uses: [['Impasto dei bun, tiepido', '140 ml'], ['Spennellare i bun col tuorlo', '1 cucchiaio']],
+      home: 'Se a casa hai almeno 160 ml di latte, non comprarlo.' },
+    { id: 'burro', name: 'Burro', icon: 'Butter', emoji: '🧈',
+      need: '70 g', buy: 'panetto da 125 g se non basta',
+      uses: [['Impasto dei bun', '30 g', 'Morbido, a pezzetti'], ['Cipolle caramellate', '20 g'],
+             ['Tostare i bun in padella', '10 g'], ['Lucidare i bun appena sfornati', '10 g', 'Fuso, col pennello']],
+      home: 'Se a casa hai almeno 70 g di burro, non comprarlo. Un panetto da 250 g usato a metà basta.' },
+    { id: 'uova', name: 'Uova', icon: 'Egg', emoji: '🥚',
+      need: '2', buy: 'confezione da 4 o 6',
+      uses: [['Impasto dei bun', '1 intero'], ['Spennellare i bun prima del forno', '1 tuorlo']],
+      home: 'Se a casa hai 2 uova, non comprarle.' },
+  ]},
+  { name: 'Dispensa', items: [
+    { id: 'farina', name: 'Farina manitoba', icon: 'Bread', emoji: '🍞',
+      need: '300 g', buy: 'pacco da 1 kg',
+      uses: [['Impasto dei bun (6 bun da 90 g)', '300 g']],
+      home: 'Se a casa hai farina 0, va bene anche metà manitoba e metà 0.' },
+    { id: 'lievito', name: 'Lievito di birra secco', icon: 'Bubbles', emoji: '🫧',
+      need: '5 g', buy: '1 bustina da 7 g',
+      uses: [['Impasto dei bun', '5 g', 'In alternativa 12 g di lievito fresco']] },
+    { id: 'salezucchero', name: 'Zucchero e sale fino', icon: 'Salt', emoji: '🧂',
+      need: 'poco', buy: 'solo se li hai finiti',
+      uses: [['Zucchero nell’impasto', '20 g'], ['Zucchero sulle cipolle', '1 pizzico'],
+             ['Sale nell’impasto', '6 g'], ['Sale nell’acqua delle patate', '1 cucchiaio'], ['Sale su polpette e patate', 'q.b.']] },
+    { id: 'sesamo', name: 'Semi di sesamo', icon: 'Seedling', emoji: '🌱',
+      need: '1 cucchiaio', buy: 'la bustina più piccola',
+      uses: [['Sopra i bun, dopo il tuorlo', '1 cucchiaio']] },
+    { id: 'maio', name: 'Maionese', icon: 'Jar', emoji: '🫙',
+      need: '4 cucchiai', buy: 'barattolo o tubetto',
+      uses: [['Burger sauce', '4 cucchiai']], home: 'Se ne hai un fondo da 4 cucchiai, basta.' },
+    { id: 'ketchup', name: 'Ketchup', icon: 'Tomato', emoji: '🍅',
+      need: '1½ cucchiai', buy: 'solo se non ce l’hai',
+      uses: [['Burger sauce', '1½ cucchiai'], ['Per le patatine, se vi piace', 'a piacere']] },
+    { id: 'senape', name: 'Senape delicata', icon: 'Hot dog', emoji: '🌭',
+      need: '1 cucchiaio', buy: 'solo se non ce l’hai',
+      uses: [['Burger sauce', '1 cucchiaio']] },
+    { id: 'cetriolini', name: 'Cetriolini sottaceto', icon: 'Cucumber', emoji: '🥒',
+      need: '3 cetriolini', buy: 'vasetto piccolo',
+      uses: [['Tritati fini nella salsa', '3'], ['L’acqua del vasetto nella salsa', '1 cucchiaino']] },
+    { id: 'spezie', name: 'Paprika affumicata e pepe nero', icon: 'Hot pepper', emoji: '🌶️',
+      need: 'poco', buy: 'solo se non li hai',
+      uses: [['Paprika nella salsa', '½ cucchiaino'], ['Paprika sulle patate appena sfornate', '1 pizzico'], ['Pepe sulle polpette', 'q.b.']] },
+    { id: 'olio', name: 'Olio extravergine', icon: 'Olive', emoji: '🫒',
+      need: '3 cucchiai', buy: 'solo se l’hai finito',
+      uses: [['Patate al forno, mescolate a caldo', '3 cucchiai']] },
+    { id: 'bicarbonato', name: 'Bicarbonato', icon: 'Test tube', emoji: '🧪',
+      need: '½ cucchiaino', buy: 'solo se non ce l’hai',
+      uses: [['Nell’acqua delle patate', '½ cucchiaino', 'Ammorbidisce la superficie: in forno fa una crosta croccante']] },
+  ]},
+  { name: 'Frutta e verdura', items: [
+    { id: 'cipolle', name: 'Cipolle dorate', icon: 'Onion', emoji: '🧅',
+      need: '2 grandi', buy: 'sciolte',
+      uses: [['Caramellate, 40 minuti a fuoco basso', '2', 'Cotte si riducono a un terzo']] },
+    { id: 'patate', name: 'Patate a pasta gialla', icon: 'Potato', emoji: '🥔',
+      need: '4 medie', buy: '~800 g, sciolte',
+      uses: [['Patate al forno a bastoncino, con la buccia', '4', 'Sbollentate 8 minuti, poi forno a 230° per 25-30 minuti']] },
+    { id: 'rosmarino', name: 'Rosmarino fresco', icon: 'Herb', emoji: '🌿',
+      need: '2 rametti', buy: 'una vaschetta',
+      uses: [['Sulle patate, ultimi 5 minuti di forno', '2 rametti']] },
+    { id: 'aglio', name: 'Aglio', icon: 'Garlic', emoji: '🧄',
+      need: '3 spicchi', buy: 'una testa',
+      uses: [['Schiacciato, sulle patate negli ultimi 5 minuti', '3 spicchi']] },
+  ]},
+];
+
+const KEY = 'spesa-burger-v1';
+let done = {};
+try { done = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
+
+const total = DEPTS.reduce((n, d) => n + d.items.length, 0);
+const CIRC = 2 * Math.PI * 25;
+const bar = document.getElementById('bar');
+bar.style.strokeDasharray = CIRC;
+
+const useRow = ([what, amt, note]) =>
+  `<div class="use"><span>${what}${note ? `<small>${note}</small>` : ''}</span><span>${amt}</span></div>`;
+
+function render() {
+  const list = document.getElementById('list');
+  list.innerHTML = DEPTS.map((d, di) => `
+    <section>
+      <div class="dept"><h2>${d.name}</h2><span id="c${di}"></span></div>
+      <ul>${d.items.map(it => `
+        <li class="card${done[it.id] ? ' on' : ''}" id="card-${it.id}">
+          <button class="item" data-id="${it.id}" type="button" aria-pressed="${!!done[it.id]}">
+            <span class="ico"><img src="${ICON(it.icon)}" alt="" data-emoji="${it.emoji}"></span>
+            <span class="txt"><div class="name">${it.name}</div><div class="qty"><b>Serve ${it.need}</b> · ${it.buy}</div></span>
+            <span class="check"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span>
+          </button>
+          <button class="more" data-more="${it.id}" type="button" aria-expanded="false" aria-controls="uses-${it.id}">
+            A cosa serve
+            <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4"/></svg>
+          </button>
+          <div class="uses" id="uses-${it.id}"><div><div class="uses-in">
+            ${it.uses.map(useRow).join('')}
+            ${it.uses.length > 1 ? `<div class="total"><span>In tutto</span><span>${it.need}</span></div>` : ''}
+            ${it.home ? `<div class="home">${it.home}</div>` : ''}
+          </div></div></div>
+        </li>`).join('')}
+      </ul>
+    </section>`).join('');
+  list.querySelectorAll('img[data-emoji]').forEach(img => {
+    img.onerror = () => { img.parentNode.textContent = img.dataset.emoji; };
+  });
+  update();
+}
+
+function update() {
+  const n = DEPTS.reduce((k, d) => k + d.items.filter(it => done[it.id]).length, 0);
+  document.getElementById('num').textContent = n + '/' + total;
+  bar.style.strokeDashoffset = CIRC * (1 - n / total);
+  DEPTS.forEach((d, di) => {
+    const k = d.items.filter(it => done[it.id]).length;
+    document.getElementById('c' + di).textContent = k + ' di ' + d.items.length;
+  });
+  document.getElementById('banner').innerHTML = n === total
+    ? `<div class="done-banner"><img src="${ICON('Shopping cart')}" alt="">Tutto nel carrello</div>` : '';
+}
+
+document.getElementById('list').addEventListener('click', e => {
+  const more = e.target.closest('.more');
+  if (more) {
+    const card = more.closest('.card');
+    const open = card.classList.toggle('open');
+    more.setAttribute('aria-expanded', open);
+    return;
+  }
+  const btn = e.target.closest('.item');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const card = btn.closest('.card');
+  done[id] = !done[id];
+  card.classList.toggle('on', done[id]);
+  btn.setAttribute('aria-pressed', done[id]);
+  if (done[id]) {
+    card.classList.remove('bump'); void card.offsetWidth; card.classList.add('bump');
+    if (navigator.vibrate) navigator.vibrate(12);
+  }
+  save(); update();
+});
+
+const reset = document.getElementById('reset');
+let armTimer;
+reset.addEventListener('click', () => {
+  if (!reset.classList.contains('arm')) {
+    reset.classList.add('arm'); reset.textContent = 'Tocca di nuovo per svuotare';
+    clearTimeout(armTimer);
+    armTimer = setTimeout(() => { reset.classList.remove('arm'); reset.textContent = 'Ricomincia la lista'; }, 3000);
+    return;
+  }
+  clearTimeout(armTimer);
+  done = {}; save(); render();
+  reset.classList.remove('arm'); reset.textContent = 'Ricomincia la lista';
+});
+
+render();
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
