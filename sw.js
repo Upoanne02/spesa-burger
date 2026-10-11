@@ -1,8 +1,8 @@
 // Tutto in cache alla prima apertura: al supermercato la lista funziona anche senza campo.
-const CACHE = 'spesa-burger-v6';
+const CACHE = 'spesa-burger-v7';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
 const ICONS = ['Cut of meat', 'Bacon', 'Cheese wedge', 'Glass of milk', 'Butter', 'Egg', 'Bread', 'Bubbles', 'Salt',
-  'Seedling', 'Jar', 'Tomato', 'Hot dog', 'Cucumber', 'Hot pepper', 'Olive', 'Test tube', 'Onion', 'Potato', 'Herb', 'Garlic', 'Shopping cart', 'Hamburger']
+  'Seedling', 'Jar', 'Tomato', 'Hot dog', 'Cucumber', 'Hot pepper', 'Olive', 'Test tube', 'Onion', 'Potato', 'Herb', 'Garlic', 'Chocolate bar', 'Hot beverage', 'Ice cream', 'Shopping cart', 'Hamburger']
   .map(n => 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/'
     + encodeURIComponent(n) + '/3D/' + n.toLowerCase().replace(/ /g, '_') + '_3d.png');
 
