@@ -1,5 +1,5 @@
 // Tutto in cache alla prima apertura: al supermercato la lista funziona anche senza campo.
-const CACHE = 'spesa-burger-v4';
+const CACHE = 'spesa-burger-v5';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
 const ICONS = ['Cut of meat', 'Bacon', 'Cheese wedge', 'Glass of milk', 'Butter', 'Egg', 'Bread', 'Bubbles', 'Salt',
   'Seedling', 'Jar', 'Tomato', 'Hot dog', 'Cucumber', 'Hot pepper', 'Olive', 'Test tube', 'Onion', 'Potato', 'Herb', 'Garlic', 'Shopping cart', 'Hamburger']
